@@ -1,0 +1,72 @@
+
+import 'dart:async';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+// ignore: camel_case_types
+class _logAppProvider{
+ 
+  String urlServicio ="https://seguros.raulcoka.com/Core/Servicios/api/rcbmovil/insertalog";
+  _logAppProvider();
+  Future sendPostLog(String transaccion,String pagina,String observacion) async {
+    // ignore: no_leading_underscores_for_local_identifiers
+    bool _bandera=false;
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    // ignore: no_leading_underscores_for_local_identifiers
+    String _identificacion ="";
+    // ignore: no_leading_underscores_for_local_identifiers
+    String _nombre ="";
+    // ignore: no_leading_underscores_for_local_identifiers
+    String _nombreinstitucion ="";
+    // ignore: no_leading_underscores_for_local_identifiers
+    int _institucion =0;//es el idcliente de la tabla de clientes
+    ///es el id de la tabla de RcbMovil..movInstituciones
+    // ignore: no_leading_underscores_for_local_identifiers
+    int _institucionRCBmovil =0;
+    // ignore: no_leading_underscores_for_local_identifiers
+    int _idasegurado =0;
+    String ob = "";
+    String objSesion = "";
+		try{
+      _bandera = prefs.getBool('existedata') ?? false;
+      _idasegurado= 0;
+      _institucion= 0;
+      _nombre= "Anonimo";
+      _institucionRCBmovil=0;
+      _identificacion= "SN";
+      _nombreinstitucion= "SN";
+      if(_bandera)
+      {
+        //obtener los datos 
+        _idasegurado= prefs.getInt('idasegurado');
+        _institucion= prefs.getInt('idinstitucion');
+        _nombre= prefs.getString('nombreasegurado');
+        _institucionRCBmovil= prefs.getInt('institucionRCBmovil');
+        _identificacion= prefs.getString('identificacion');
+        _nombreinstitucion= prefs.getString('nombreinstitucion');
+        
+      }
+      objSesion = '{idasegurado:$_idasegurado,institucion:$_institucion,nombre:"$_nombre",institucinorcbmovil:$_institucionRCBmovil,identificacion:"$_identificacion"},nombreinstitucion:"$_nombreinstitucion"';
+		}
+		// ignore: empty_catches
+		catch(ex){
+      
+		}   
+    ob = '{observacion:"$observacion",sesion:$objSesion' ;
+    var url = Uri.parse(urlServicio);
+		var parametro ={"Plataforma":"APP MOVIL", "Transaccion":transaccion, "Pagina":pagina, "Usuario":_identificacion.toString(), "Observacion":ob};
+    try{
+    final response =
+        await http.post(url,
+        body: parametro
+      );
+
+      if (response.statusCode == 200) {
+        
+      } 
+    }
+    // ignore: empty_catches
+    catch(ex){}
+  }
+}
+
+final logAppProvider = _logAppProvider();
